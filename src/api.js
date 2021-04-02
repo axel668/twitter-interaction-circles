@@ -1,5 +1,25 @@
 
 /**
+ * Fetch followers (max. 1000)
+ * @param screen_name
+ * @returns {Promise<[]>} Returns an array of posts
+ */
+async function getFollowers(screen_name) {
+	const max_id = null;
+	let params = {
+		screen_name,
+		count: 1000,
+		stringify_ids: true,
+		...(!!max_id && {max_id}),
+	};
+
+	console.log("Fetching Followers");
+	const res = await globalThis.TwitterClient.get("followers/ids", params);
+	return res.ids;
+}
+
+
+/**
  * Fetch a single page of the mentions
  * @param screen_name
  * @param page
@@ -161,6 +181,7 @@ async function getUser(screen_name) {
 }
 
 module.exports = {
+	getFollowers,
 	getMentions,
 	getLiked,
 	getTimeline,

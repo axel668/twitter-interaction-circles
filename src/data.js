@@ -1,4 +1,4 @@
-const {getMentions, getTimeline, getLiked, getAvatars} = require("./api");
+const {getFollowers, getMentions, getTimeline, getLiked, getAvatars} = require("./api");
 
 /**
  * A small function that records an interaction.
@@ -36,7 +36,8 @@ function countReplies(interactions, timeline, screen_name) {
 	for (const post of timeline) {
 		if (
 			!!post.in_reply_to_user_id_str &&
-			post.in_reply_to_screen_name.toLowerCase() !== screen_name
+			post.in_reply_to_screen_name.toLowerCase() !== screen_name &&
+			globalThis.followers.includes(post.in_reply_to_user_id_str)
 		) {
 			addRecord(
 				interactions,
@@ -61,7 +62,8 @@ function countRetweets(interactions, timeline, screen_name) {
 		if (
 			post.retweeted_status &&
 			post.retweeted_status.user &&
-			post.retweeted_status.user.screen_name.toLowerCase() !== screen_name
+			post.retweeted_status.user.screen_name.toLowerCase() !== screen_name &&
+			globalThis.followers.includes(post.retweeted_status.user.id_str)
 		) {
 			addRecord(
 				interactions,
@@ -81,7 +83,8 @@ function countRetweets(interactions, timeline, screen_name) {
  */
 function countLikes(interactions, likes, screen_name) {
 	for (const post of likes) {
-		if (post.user.screen_name.toLowerCase() !== screen_name) {
+		if (post.user.screen_name.toLowerCase() !== screen_name &&
+		globalThis.followers.includes(post.user.id_str)) {
 			addRecord(
 				interactions,
 				post.user.screen_name,
@@ -100,7 +103,8 @@ function countLikes(interactions, likes, screen_name) {
  */
 function countMentions(interactions, mentions, screen_name) {
 	for (const post of mentions) {
-		if (post.user.screen_name.toLowerCase() !== screen_name) {
+		if (post.user.screen_name.toLowerCase() !== screen_name &&
+		globalThis.followers.includes(post.user.id_str)) {
 			addRecord(
 				interactions,
 				post.user.screen_name,
@@ -112,6 +116,7 @@ function countMentions(interactions, mentions, screen_name) {
 }
 
 module.exports = async function getInteractions(screen_name, layers) {
+	globalThis.followers = await getFollowers(screen_name);
 	const mentions = await getMentions(screen_name);
 	const timeline = await getTimeline(screen_name);
 	const liked = await getLiked(screen_name);
