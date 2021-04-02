@@ -1,4 +1,4 @@
-const {getFollowers, getMentions, getTimeline, getLiked, getAvatars} = require("./api");
+const {getFollowers, getFriends, getMentions, getTimeline, getLiked, getAvatars} = require("./api");
 
 /**
  * A small function that records an interaction.
@@ -117,6 +117,7 @@ function countMentions(interactions, mentions, screen_name) {
 
 module.exports = async function getInteractions(screen_name, layers) {
 	globalThis.followers = await getFollowers(screen_name);
+	globalThis.friends = await getFriends(screen_name);
 	const mentions = await getMentions(screen_name);
 	const timeline = await getTimeline(screen_name);
 	const liked = await getLiked(screen_name);

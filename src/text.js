@@ -15,7 +15,11 @@ async function renderText(data) {
 
 		// For each user add a line with the username
 		for (const user of layer) {
-			output += "@" + user.screen_name + "\n";
+			if (globalThis.friends.includes(user.id)) {
+				output += "@" + user.screen_name + "\n";
+			} else {
+				output += "@" + user.screen_name + " ###\n";
+			}
 		}
 
 		output += "\n";
