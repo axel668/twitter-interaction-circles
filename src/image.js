@@ -21,7 +21,7 @@ module.exports = async function render(config) {
 	const ctx = canvas.getContext("2d");
 
 	// fill the background
-	ctx.fillStyle = "#C5EDCE";
+	ctx.fillStyle = "#424242";
 	ctx.fillRect(0, 0, width, height);
 
 	// loop over the layers

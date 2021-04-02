@@ -18,8 +18,12 @@ async function main() {
 	const client = new Twitter({
 		consumer_key: process.env.CONSUMER_KEY,
 		consumer_secret: process.env.CONSUMER_SECRET,
+		access_token_key: process.env.ACCESS_TOKEN_KEY,
+		access_token_secret: process.env.ACCESS_TOKEN_SECRET,
+
 	});
 
+	/*
 	// Use the previous client to fetch the bearer token
 	// This method gives you an application-only token specifically for read-only access to public information.
 	const bearer = await client.getBearerToken();
@@ -28,11 +32,13 @@ async function main() {
 	// We assign this client to a global variable so we can access it in the api module
 	globalThis.TwitterClient = new Twitter({
 		bearer_token: bearer.access_token,
-	});
+	});*/
+
+	globalThis.TwitterClient = client;
 
 	// fetch the information of the logged in user
 	// instead of getMe you could replace it with another method to get a third user to generate their circles
-	const user = await getUser("WHATEVER_USERNAME_YOU_WANT");
+	const user = await getUser(process.env.USER_NAME);
 
 	// this is how many users we will have for each layer from the inside out
 	const layers = [8, 15, 26];

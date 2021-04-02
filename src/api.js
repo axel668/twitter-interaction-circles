@@ -1,5 +1,46 @@
 
 /**
+ * Fetch a single page of the mentions
+ * @param screen_name
+ * @param page
+ * @param max_id
+ * @returns {Promise<[]>} Returns an array of posts
+ */
+async function getMentionsPage(screen_name, page, max_id = null) {
+	let params = {
+		//screen_name,
+		count: 200,
+		...(!!max_id && {max_id}),
+	};
+
+	console.log("Fetching Mentions page " + page);
+	const res = await globalThis.TwitterClient.get("statuses/mentions_timeline", params);
+	return res;
+}
+
+/**
+ * Fetch all mentions available for a user.
+ * @param screen_name
+ * @returns {Promise<[]>}
+ */
+async function getMentions(screen_name) {
+	let page = 1;
+	let posts = await getMentionsPage(screen_name, page++);
+	let timeline = [...posts];
+
+	// in debug mode we fetch only one page
+	while (posts.length > 0 && (!process.env.DEBUG || page <= 1)) {
+		timeline = [...timeline, ...posts];
+		const max_id = "" + (BigInt(posts[posts.length - 1].id_str) - 1n);
+		posts = await getMentionsPage(screen_name, page++, max_id);
+	}
+
+	return timeline;
+}
+
+
+
+/**
  * Fetch a single page of the timeline
  * @param screen_name
  * @param page
@@ -120,6 +161,7 @@ async function getUser(screen_name) {
 }
 
 module.exports = {
+	getMentions,
 	getLiked,
 	getTimeline,
 	getAvatars,

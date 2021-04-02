@@ -1,4 +1,4 @@
-const {getTimeline, getLiked, getAvatars} = require("./api");
+const {getMentions, getTimeline, getLiked, getAvatars} = require("./api");
 
 /**
  * A small function that records an interaction.
@@ -19,6 +19,7 @@ function addRecord(interactions, screen_name, user_id, type) {
 			reply: 0,
 			retweet: 0,
 			like: 0,
+			mention: 0,
 			[type]: 1,
 		};
 }
@@ -91,7 +92,27 @@ function countLikes(interactions, likes, screen_name) {
 	}
 }
 
+/**
+ * Loop over the mentions and record the all the ones that are not ours.
+ * @param interactions
+ * @param mentions
+ * @param screen_name
+ */
+function countMentions(interactions, mentions, screen_name) {
+	for (const post of mentions) {
+		if (post.user.screen_name.toLowerCase() !== screen_name) {
+			addRecord(
+				interactions,
+				post.user.screen_name,
+				post.user.id_str,
+				"mention"
+			);
+		}
+	}
+}
+
 module.exports = async function getInteractions(screen_name, layers) {
+	const mentions = await getMentions(screen_name);
 	const timeline = await getTimeline(screen_name);
 	const liked = await getLiked(screen_name);
 
@@ -104,10 +125,12 @@ module.exports = async function getInteractions(screen_name, layers) {
 	 *		reply: number,
 	 *		retweet: number,
 	 *		like: number,
+	 *      mention: number,
 	 * }
 	 */
 	const interactions = {};
 
+	countMentions(interactions, mentions, screen_name);
 	countReplies(interactions, timeline, screen_name);
 	countRetweets(interactions, timeline, screen_name);
 	countLikes(interactions, liked, screen_name);
@@ -127,9 +150,10 @@ module.exports = async function getInteractions(screen_name, layers) {
 	 */
 	for (const [key, interaction] of Object.entries(interactions)) {
 		let total = 0;
-		total += interaction.like;
-		total += interaction.reply * 1.1;
-		total += interaction.retweet * 1.3;
+		total += interaction.like * 0.5;
+		total += interaction.reply * 1;
+		total += interaction.retweet * 1.5;
+		total += interaction.mention * 2;
 
 		tally.push({
 			id: interaction.id,
